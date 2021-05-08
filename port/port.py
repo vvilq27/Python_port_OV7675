@@ -28,7 +28,7 @@ while True:
 		try:
 			missedRowIndexes.remove(rowIndex)
 		except:
-			print("bad row: {} ".format(str(rowIndex)))
+			print("bad row: {} len: {}".format(str(rowIndex), str(len(l))))
 
 	else:
 		badRowsCnt += 1

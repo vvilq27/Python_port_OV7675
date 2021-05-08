@@ -1,13 +1,15 @@
 import time
 import serial
 import os
+# import multiprocessing
 import threading
+from queue import Queue
 
 
 # while True:
 
 # file = open("data.txt", "wb")
-s = serial.Serial('COM6', 512000)
+s = serial.Serial('COM6', 500000)
 
 PIXSPERROW = 250
 
@@ -17,12 +19,11 @@ missedRowIndexes = [i for i in range(11,163)]
 
 line = 'hello'
 
-def readPort(name):
-	global line
 
-	while(True):
-		line = s.readline().hex()
-		# print(line[:20])
+def readPort(name):
+	line = s.readline().hex()
+
+	print('{} {}'.format(name, len(line)))
 
 def printLine(name):
 	global line
@@ -30,17 +31,71 @@ def printLine(name):
 	while(True):
 		# print(len(line))
 		if len(line) != 0:
-			print(line)
+			print(line[:40])
 			line = ''
 
-readThread = threading.Thread(target=readPort, args=(1,))
-printThread = threading.Thread(target=printLine, args=(2,))
+lastTime = time.time()
+frameLength = 0
+
+while(True):
+	if s.in_waiting > 0:
+		data = s.read(s.in_waiting).hex()
+		print(len(data))
+		frameLength += len(data)
+
+		currentTime = time.time()
+
+		if currentTime - lastTime > 0.9:
+			print('fram grabbed of size: {}'.format(frameLength))
+			frameLength = 0
+			lastTime = currentTime
+
+
+'''
+readThread = multiprocessing.Process(target=readPort, args=(1,))
+printThread = multiprocessing.Process(target=printLine, args=(2,))
 
 readThread.start()
+'''
+
 # 
-printThread.start()
-readThread.join()
+# printThread.start()
+# readThread.join()
 # printThread.join()
+
+
+
+
+# def threader():
+# 	while(True):
+# 		readPort(1)
+
+
+
+
+# q = Queue()
+
+# readThread = threading.Thread(target=threader)
+# readThread.deamon = True
+
+# readThread.start()
+
+# printThread = threading.Thread(target=printLine, args=(2,))
+# printThread.deamon = True
+
+# printThread.start()
+
+
+# for worker in range(20):
+# 	q.put(worker)
+
+# q.join()
+
+
+
+
+
+
 
 '''
 while True:
